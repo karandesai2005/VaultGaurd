@@ -15,13 +15,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { login, loginWithGoogle } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       await login(email, password);
     } catch (error) {
@@ -33,7 +33,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 
   const handleGoogleLogin = async () => {
     setIsSubmitting(true);
-    
+
     try {
       await loginWithGoogle();
     } catch (error) {
@@ -47,7 +47,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
     <Card className="w-full max-w-md bg-vault-darker border-gray-800">
       <CardHeader className="space-y-1 flex items-center flex-col">
         <Shield className="h-12 w-12 text-vault-accent mb-2" />
-        <CardTitle className="text-2xl font-bold text-center">Login to VaultGuard</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center text-vault-text">Login to VaultGuard</CardTitle>
         <CardDescription className="text-center">
           Enter your credentials to access your secure passwords
         </CardDescription>
@@ -83,16 +83,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
               className="bg-vault-dark border-gray-700"
             />
           </div>
-          
-          <Button 
-            type="submit" 
+
+          <Button
+            type="submit"
             className="w-full bg-vault-accent hover:bg-vault-accent-hover"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Logging in...' : 'Login'}
           </Button>
         </form>
-        
+
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-700"></div>
@@ -101,10 +101,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
             <span className="bg-vault-darker px-2 text-vault-muted">Or continue with</span>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="border-gray-700 hover:bg-vault-dark"
             onClick={handleGoogleLogin}
             disabled={isSubmitting}
@@ -117,8 +117,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
       <CardFooter className="flex flex-col">
         <div className="text-sm text-vault-muted">
           Don't have an account?{' '}
-          <button 
-            onClick={onToggleMode} 
+          <button
+            onClick={onToggleMode}
             className="text-vault-accent hover:underline"
           >
             Sign up

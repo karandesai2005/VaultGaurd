@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/components/AppLayout';
@@ -158,11 +157,6 @@ const Index = () => {
             
             <div className="mt-6 pt-6 border-t border-gray-800">
               <p className="text-vault-muted text-sm">
-                <img 
-                  src="/lovable-uploads/0cd46cff-c435-4d94-ac6d-50ca9fc7e653.png" 
-                  alt="Password Management Flow" 
-                  className="float-right w-1/4 ml-4 mb-4 rounded-lg border border-gray-800"
-                />
                 VaultGuard leverages the power of Web3 technologies for unprecedented security. Your passwords are never stored or transmitted in plain text. The local encryption means even we can't access your passwords. The blockchain integration via Polygon Mumbai ensures tamper-proof references to your encrypted data on IPFS.
               </p>
             </div>
