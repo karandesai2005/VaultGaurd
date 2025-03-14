@@ -1,0 +1,68 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+  
+  html, body {
+    @apply bg-vault-dark text-vault-text;
+  }
+  
+  input, textarea, select {
+    @apply text-vault-text;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .btn-primary {
+    @apply bg-vault-accent hover:bg-vault-accent-hover text-white font-semibold px-4 py-2 rounded transition-colors duration-200;
+  }
+  
+  .card-container {
+    @apply bg-vault-darker rounded-lg p-6 shadow-lg border border-gray-800;
+  }
+  
+  .form-input {
+    @apply bg-vault-dark border border-gray-700 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-vault-accent text-vault-text;
+  }
+}
