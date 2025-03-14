@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
     <Card className="w-full max-w-md bg-vault-darker border-gray-800">
       <CardHeader className="space-y-1 flex items-center flex-col">
         <Shield className="h-12 w-12 text-vault-accent mb-2" />
-        <CardTitle className="text-2xl font-bold text-center">Login to VaultGuard</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center text-vault-text">Login to VaultGuard</CardTitle>
         <CardDescription className="text-center">
           Enter your credentials to access your secure passwords
         </CardDescription>
