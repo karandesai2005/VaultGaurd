@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Slider } from '@/components/ui/slider';
 import { usePassword } from '@/contexts/PasswordContext';
 import { Copy, RefreshCw, Shield, CheckCircle } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/lib/toast';
 
 const PasswordGenerator: React.FC = () => {
   const { generatedPassword, generatePassword } = usePassword();
