@@ -12,7 +12,7 @@ interface PasswordStorageProps {
 }
 
 const PasswordStorage: React.FC<PasswordStorageProps> = ({ onPasswordStored }) => {
-  const { generatedPassword, storePassword } = usePassword();
+  const { generatedPassword, storePassword, clearGeneratedPassword } = usePassword();
   const [website, setWebsite] = useState('');
   const [customPassword, setCustomPassword] = useState('');
   const [isStoring, setIsStoring] = useState(false);
@@ -26,27 +26,32 @@ const PasswordStorage: React.FC<PasswordStorageProps> = ({ onPasswordStored }) =
       toast.error('Please provide both website and password');
       return;
     }
-    
+
     setIsStoring(true);
     setStorageComplete(false);
-    
+
     try {
       await storePassword(website, passwordToStore);
       setWebsite('');
       setCustomPassword('');
       setStorageComplete(true);
-      
+
       // Reset storage complete after 3 seconds
       setTimeout(() => setStorageComplete(false), 3000);
-      
+
       if (onPasswordStored) {
         onPasswordStored();
       }
     } catch (error) {
       console.error('Failed to store password:', error);
+      toast.error('Failed to store password on IPFS');
     } finally {
       setIsStoring(false);
     }
+  };
+
+  const handleClearGeneratedPassword = () => {
+    clearGeneratedPassword();
   };
 
   return (
@@ -57,7 +62,7 @@ const PasswordStorage: React.FC<PasswordStorageProps> = ({ onPasswordStored }) =
           <CardTitle>Store Password</CardTitle>
         </div>
         <CardDescription>
-          Save your password securely in the encrypted vault
+          Save your password securely on IPFS (encrypted locally)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -71,22 +76,31 @@ const PasswordStorage: React.FC<PasswordStorageProps> = ({ onPasswordStored }) =
             className="bg-vault-dark border-gray-700"
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="password">Password to Store</Label>
           <Input
             id="password"
             type="password"
             placeholder={generatedPassword ? 'Using generated password' : 'Enter a password'}
-            value={customPassword}
+            value={generatedPassword || customPassword}
             onChange={(e) => setCustomPassword(e.target.value)}
             disabled={!!generatedPassword}
             className="bg-vault-dark border-gray-700"
           />
           {generatedPassword ? (
-            <p className="text-sm text-vault-muted">
-              Using the generated password. Generate a new one or clear it to use a custom password.
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-vault-muted">
+                Using the generated password. Clear it to use a custom password.
+              </p>
+              <Button
+                onClick={handleClearGeneratedPassword}
+                className="text-sm text-vault-accent hover:underline"
+                variant="link"
+              >
+                Clear
+              </Button>
+            </div>
           ) : (
             <p className="text-sm text-vault-muted">
               Enter a custom password or use the generator above to create a secure one.
@@ -102,17 +116,17 @@ const PasswordStorage: React.FC<PasswordStorageProps> = ({ onPasswordStored }) =
         )}
       </CardContent>
       <CardFooter>
-        <Button 
+        <Button
           onClick={handleStore}
           className="w-full hover-scale bg-vault-accent hover:bg-vault-accent-hover"
           disabled={!canStore || isStoring}
         >
           <Save className="h-4 w-4 mr-2" />
-          {isStoring 
-            ? 'Encrypting and Storing...' 
-            : storageComplete 
-              ? 'Password Stored Successfully!' 
-              : 'Store Password Securely'}
+          {isStoring
+            ? 'Encrypting and Storing on IPFS...'
+            : storageComplete
+            ? 'Password Stored Successfully!'
+            : 'Store Password Securely'}
         </Button>
       </CardFooter>
     </Card>

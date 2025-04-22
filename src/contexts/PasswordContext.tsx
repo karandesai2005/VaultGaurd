@@ -1,136 +1,113 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from '@/lib/toast';
+import React, { createContext, useContext, useState } from "react";
+import CryptoJS from "crypto-js";
+import { toast } from "@/lib/toast";
+import { create } from "ipfs-http-client";
 
-// Types
-type StoredPassword = {
-  id: string;
+// Initialize IPFS client (using Infura's free gateway)
+const ipfs = create({ url: "https://ipfs.infura.io:5001" });
+
+interface PasswordEntry {
   website: string;
-  password: string;
-  createdAt: string;
-};
+  ipfsHash: string; // Store IPFS hash instead of encrypted password
+}
 
-type PasswordContextType = {
-  storedPasswords: StoredPassword[];
+interface PasswordContextType {
   generatedPassword: string | null;
-  generatePassword: (length?: number) => void;
+  passwords: PasswordEntry[];
+  generatePassword: (length: number) => void;
   storePassword: (website: string, password: string) => Promise<void>;
-  retrievePassword: (id: string) => Promise<string | null>;
-  deletePassword: (id: string) => Promise<void>;
-};
+  retrievePassword: (ipfsHash: string) => Promise<string | null>;
+  deletePassword: (ipfsHash: string) => void;
+  clearGeneratedPassword: () => void;
+}
 
-// Create context
-const PasswordContext = createContext<PasswordContextType | undefined>(undefined);
+const PasswordContext = createContext<PasswordContextType | null>(null);
 
-// Sample stored passwords (mock data)
-const MOCK_PASSWORDS: StoredPassword[] = [
-  { id: '1', website: 'example.com', password: 'P@ssw0rd!123', createdAt: new Date().toISOString() },
-  { id: '2', website: 'github.com', password: 'G1tHub#2023', createdAt: new Date().toISOString() },
-];
-
-export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [storedPasswords, setStoredPasswords] = useState<StoredPassword[]>([]);
+export const PasswordProvider = ({ children }: { children: React.ReactNode }) => {
+  const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Initialize with mock data
-    setStoredPasswords(MOCK_PASSWORDS);
-  }, []);
-
-  const generatePassword = (length = 12) => {
-    const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
-    const numberChars = '0123456789';
-    const specialChars = '!@#$%^&*()_+~`|}{[]:;?><,./-=';
-    
-    const allChars = uppercaseChars + lowercaseChars + numberChars + specialChars;
-    let password = '';
-    
-    // Ensure at least one character from each category
-    password += uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length));
-    password += lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length));
-    password += numberChars.charAt(Math.floor(Math.random() * numberChars.length));
-    password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
-    
-    // Fill the rest of the password
-    for (let i = 4; i < length; i++) {
-      password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+  const generatePassword = (length: number): void => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    
-    // Shuffle the password characters
-    password = password.split('').sort(() => 0.5 - Math.random()).join('');
-    
     setGeneratedPassword(password);
-    return password;
+    toast.success("Password generated!");
   };
 
-  const storePassword = async (website: string, password: string) => {
+  const clearGeneratedPassword = () => {
+    setGeneratedPassword(null);
+  };
+
+  const encryptPassword = (password: string): string => {
+    const key = "vaultguard-secret-key"; // In production, derive this securely
+    return CryptoJS.AES.encrypt(password, key).toString();
+  };
+
+  const decryptPassword = (encryptedPassword: string): string => {
+    const key = "vaultguard-secret-key";
+    const bytes = CryptoJS.AES.decrypt(encryptedPassword, key);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  };
+
+  const storePassword = async (website: string, password: string): Promise<void> => {
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const newPassword: StoredPassword = {
-        id: Date.now().toString(),
-        website,
-        password,
-        createdAt: new Date().toISOString(),
-      };
-      
-      setStoredPasswords(prev => [...prev, newPassword]);
-      toast.success('Password stored securely!');
+      const encryptedPassword = encryptPassword(password);
+      const result = await ipfs.add(encryptedPassword);
+      const ipfsHash = result.cid.toString();
+      setPasswords((prev) => [...prev, { website, ipfsHash }]);
+      toast.success(`Password for ${website} encrypted and stored on IPFS! Hash: ${ipfsHash}`);
+      setGeneratedPassword(null); // Clear generated password after storing
     } catch (error) {
-      toast.error('Failed to store password');
+      toast.error("Failed to store password on IPFS");
+      console.error(error);
       throw error;
     }
   };
 
-  const retrievePassword = async (id: string) => {
+  const retrievePassword = async (ipfsHash: string): Promise<string | null> => {
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const password = storedPasswords.find(p => p.id === id);
-      
-      if (!password) {
-        throw new Error('Password not found');
+      const response = await ipfs.cat(ipfsHash);
+      let encryptedPassword = "";
+      for await (const chunk of response) {
+        encryptedPassword += new TextDecoder().decode(chunk);
       }
-      
-      toast.success('Password retrieved successfully');
-      return password.password;
+      const decryptedPassword = decryptPassword(encryptedPassword);
+      toast.success("Password retrieved from IPFS and decrypted locally!");
+      return decryptedPassword;
     } catch (error) {
-      toast.error('Failed to retrieve password');
+      toast.error("Failed to retrieve password from IPFS");
+      console.error(error);
       return null;
     }
   };
 
-  const deletePassword = async (id: string) => {
-    try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setStoredPasswords(prev => prev.filter(p => p.id !== id));
-      toast.success('Password deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete password');
-      throw error;
-    }
+  const deletePassword = (ipfsHash: string) => {
+    setPasswords((prev) => prev.filter((p) => p.ipfsHash !== ipfsHash));
+    toast.success("Password entry removed!");
   };
 
-  const value = {
-    storedPasswords,
-    generatedPassword,
-    generatePassword,
-    storePassword,
-    retrievePassword,
-    deletePassword,
-  };
-
-  return <PasswordContext.Provider value={value}>{children}</PasswordContext.Provider>;
+  return (
+    <PasswordContext.Provider
+      value={{
+        generatedPassword,
+        passwords,
+        generatePassword,
+        storePassword,
+        retrievePassword,
+        deletePassword,
+        clearGeneratedPassword,
+      }}
+    >
+      {children}
+    </PasswordContext.Provider>
+  );
 };
 
-export const usePassword = () => {
+export const usePassword = (): PasswordContextType => {
   const context = useContext(PasswordContext);
-  if (context === undefined) {
-    throw new Error('usePassword must be used within a PasswordProvider');
-  }
+  if (!context) throw new Error("usePassword must be used within a PasswordProvider");
   return context;
 };
