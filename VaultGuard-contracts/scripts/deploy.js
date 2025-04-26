@@ -1,12 +1,19 @@
+const { ethers } = require("hardhat");
+
 async function main() {
-    const VaultGuard = await ethers.getContractFactory("VaultGuard");
-    const vault = await VaultGuard.deploy();
-    await vault.waitForDeployment(); // Wait for deployment confirmation
-    console.log("VaultGuard deployed to:", await vault.getAddress());
-  }
-  
-  main()
-    .catch((error) => {
-      console.error(error);
-      process.exitCode = 1;
-    });
+  const VaultGuard = await ethers.getContractFactory("VaultGuard");
+  const vaultGuard = await VaultGuard.deploy();
+  const tx = await vaultGuard.waitForDeployment();
+  console.log("Deployment transaction:", tx);
+  console.log("VaultGuard deployed to:", vaultGuard.target);
+
+  // Verify deployment
+  const provider = ethers.provider;
+  const code = await provider.getCode(vaultGuard.target);
+  console.log("Contract code:", code);
+}
+
+main().catch((error) => {
+  console.error("Deployment error:", error);
+  process.exitCode = 1;
+});

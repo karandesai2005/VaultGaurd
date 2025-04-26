@@ -1,14 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
 import CryptoJS from "crypto-js";
 import { toast } from "@/lib/toast";
-import { create } from "ipfs-http-client";
-
-// Initialize IPFS client (using Infura's free gateway)
-const ipfs = create({ url: "https://ipfs.infura.io:5001" });
+import axios from "axios";
+import { ethers } from "ethers";
 
 interface PasswordEntry {
   website: string;
-  ipfsHash: string; // Store IPFS hash instead of encrypted password
+  ipfsHash: string;
 }
 
 interface PasswordContextType {
@@ -22,6 +20,35 @@ interface PasswordContextType {
 }
 
 const PasswordContext = createContext<PasswordContextType | null>(null);
+
+const contractAddress = "0x525826FCA6fac419faA362A1c9e8426976a8aCA1";
+const contractAbi = [
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "address", name: "user", type: "address" },
+      { indexed: false, internalType: "string", name: "ipfsHash", type: "string" },
+    ],
+    name: "HashStored",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "getHash",
+    outputs: [{ internalType: "string", name: "", type: "string" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "string", name: "ipfsHash", type: "string" }],
+    name: "storeHash",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
+
+const walletAddress = "0x89732a1a0A4109ef9c812F63499C9c604e7CEEc1";
 
 export const PasswordProvider = ({ children }: { children: React.ReactNode }) => {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
@@ -42,7 +69,7 @@ export const PasswordProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   const encryptPassword = (password: string): string => {
-    const key = "vaultguard-secret-key"; // In production, derive this securely
+    const key = "vaultguard-secret-key";
     return CryptoJS.AES.encrypt(password, key).toString();
   };
 
@@ -55,31 +82,82 @@ export const PasswordProvider = ({ children }: { children: React.ReactNode }) =>
   const storePassword = async (website: string, password: string): Promise<void> => {
     try {
       const encryptedPassword = encryptPassword(password);
-      const result = await ipfs.add(encryptedPassword);
-      const ipfsHash = result.cid.toString();
+      console.log("Encrypted password (raw):", encryptedPassword);
+
+      const pinataJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJlYWIyNGVhOS04ODExLTQ0ZmItYThkMy05MTY0ODUwYjc4OGMiLCJlbWFpbCI6ImthcmFuaXNodWRlc2FpMkBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiODA2ZTZiNTI2ZDkyZDY4YWQwMmYiLCJzY29wZWRLZXlTZWNyZXQiOiIzNDc2ODU0M2QxZDViMWFkNWM1NWEzNzg2NmNkZjg1NGQ0NWMyOTU3OGVkNDdkYTlhMjc3YTRmYTYwZmQ4NTYxIiwiZXhwIjoxNzc3MjMyMTM0fQ.YjfOu8ikli2PfRjj5zacpGoIIvaPuiSu4KgUfBglQxg";
+      const url = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
+
+      // Wrap encryptedPassword in a JSON object
+      const payload = {
+        encryptedPassword: encryptedPassword,
+      };
+      console.log("Payload sent to Pinata:", JSON.stringify(payload, null, 2));
+
+      const response = await axios.post(url, payload, {
+        headers: {
+          Authorization: `Bearer ${pinataJwt}`, // Use JWT for authentication
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status !== 200) {
+        console.error("Pinata API error:", {
+          status: response.status,
+          data: response.data,
+          headers: response.headers,
+          config: response.config,
+        });
+        throw new Error(`Pinata upload failed: ${response.status} - ${JSON.stringify(response.data)}`);
+      }
+
+      const ipfsHash = response.data.IpfsHash;
+      console.log("IPFS Hash from frontend:", ipfsHash);
+
+      if (!window.ethereum) {
+        throw new Error("MetaMask is not installed");
+      }
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+      const userAddress = await signer.getAddress();
+      console.log("Connected address:", userAddress);
+
+      if (userAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+        throw new Error("Please connect MetaMask with the correct account: 0x89732a1a0A4109ef9c812F63499C9c604e7CEEc1");
+      }
+
+      const contract = new ethers.Contract(contractAddress, contractAbi, signer);
+      const tx = await contract.storeHash(ipfsHash);
+      const receipt = await tx.wait();
+      console.log("Transaction hash:", tx.hash);
+
       setPasswords((prev) => [...prev, { website, ipfsHash }]);
-      toast.success(`Password for ${website} encrypted and stored on IPFS! Hash: ${ipfsHash}`);
-      setGeneratedPassword(null); // Clear generated password after storing
-    } catch (error) {
-      toast.error("Failed to store password on IPFS");
-      console.error(error);
+      toast.success(`Password for ${website} encrypted and stored! Hash: ${ipfsHash}`);
+      clearGeneratedPassword();
+    } catch (error: any) {
+      console.error("Store password error:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response ? error.response.data : "No response data",
+      });
+      toast.error(error.message || "Failed to store password on IPFS");
       throw error;
     }
   };
 
   const retrievePassword = async (ipfsHash: string): Promise<string | null> => {
     try {
-      const response = await ipfs.cat(ipfsHash);
-      let encryptedPassword = "";
-      for await (const chunk of response) {
-        encryptedPassword += new TextDecoder().decode(chunk);
+      const response = await axios.get(`https://gateway.pinata.cloud/ipfs/${ipfsHash}`);
+      const encryptedPassword = response.data.encryptedPassword; // Match the payload structure
+      if (!encryptedPassword) {
+        throw new Error("Invalid data format from IPFS");
       }
       const decryptedPassword = decryptPassword(encryptedPassword);
-      toast.success("Password retrieved from IPFS and decrypted locally!");
+      toast.success("Password retrieved and decrypted!");
       return decryptedPassword;
     } catch (error) {
       toast.error("Failed to retrieve password from IPFS");
-      console.error(error);
+      console.error("Retrieval error:", error);
       return null;
     }
   };
