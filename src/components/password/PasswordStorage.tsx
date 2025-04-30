@@ -59,7 +59,7 @@ const PasswordStorage: React.FC<PasswordStorageProps> = ({ onPasswordStored }) =
       <CardHeader>
         <div className="flex items-center">
           <Database className="h-5 w-5 text-vault-accent mr-2" />
-          <CardTitle>Store Password</CardTitle>
+          <CardTitle className="text-white">Store Password</CardTitle>
         </div>
         <CardDescription>
           Save your password securely on IPFS (encrypted locally)
@@ -67,7 +67,7 @@ const PasswordStorage: React.FC<PasswordStorageProps> = ({ onPasswordStored }) =
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="website">Website or Application Name</Label>
+          <Label htmlFor="website" className="text-white">Website or Application Name</Label>
           <Input
             id="website"
             placeholder="example.com"
@@ -78,7 +78,7 @@ const PasswordStorage: React.FC<PasswordStorageProps> = ({ onPasswordStored }) =
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Password to Store</Label>
+          <Label htmlFor="password" className="text-white">Password to Store</Label>
           <Input
             id="password"
             type="password"

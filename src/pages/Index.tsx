@@ -60,17 +60,17 @@ const Index = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div className="flex flex-col items-center p-2">
                   <Shield className="h-8 w-8 text-vault-accent mb-2" />
-                  <h3 className="font-medium">Encrypted Locally</h3>
+                  <h3 className="font-medium text-white">Encrypted Locally</h3>
                   <p className="text-vault-muted text-center">Your passwords never leave your device unencrypted</p>
                 </div>
                 <div className="flex flex-col items-center p-2">
                   <Database className="h-8 w-8 text-vault-accent mb-2" />
-                  <h3 className="font-medium">Stored on IPFS</h3>
+                  <h3 className="font-medium text-white">Stored on IPFS</h3>
                   <p className="text-vault-muted text-center">Encrypted data stored on decentralized storage</p>
                 </div>
                 <div className="flex flex-col items-center p-2">
                   <Key className="h-8 w-8 text-vault-accent mb-2" />
-                  <h3 className="font-medium">Blockchain Security</h3>
+                  <h3 className="font-medium text-white">Blockchain Security</h3>
                   <p className="text-vault-muted text-center">References secured via Polygon Mumbai blockchain</p>
                 </div>
               </div>
@@ -117,7 +117,7 @@ const Index = () => {
         
         <Card className="mt-8 bg-vault-darker border-gray-800">
           <CardHeader>
-            <CardTitle className="text-xl">VaultGuard: Web3 Password Management</CardTitle>
+            <CardTitle className="text-xl" className="text-white">VaultGuard: Web3 Password Management</CardTitle>
             <CardDescription>
               Understanding the technology behind your secure password vault
             </CardDescription>
@@ -127,7 +127,7 @@ const Index = () => {
               <div className="space-y-2">
                 <div className="flex items-center">
                   <RefreshCw className="h-5 w-5 text-vault-accent mr-2" />
-                  <h3 className="font-medium">Generate</h3>
+                  <h3 className="font-medium" className="text-white">Generate</h3>
                 </div>
                 <p className="text-vault-muted text-sm">
                   Create strong, unique passwords with our generator. Mix of uppercase, lowercase, numbers, and symbols for maximum security.
@@ -137,7 +137,7 @@ const Index = () => {
               <div className="space-y-2">
                 <div className="flex items-center">
                   <Database className="h-5 w-5 text-vault-accent mr-2" />
-                  <h3 className="font-medium">Store</h3>
+                  <h3 className="font-medium" className="text-white">Store</h3>
                 </div>
                 <p className="text-vault-muted text-sm">
                   Passwords are encrypted locally before being stored on IPFS. Only encrypted data leaves your device, ensuring maximum privacy.
@@ -147,7 +147,7 @@ const Index = () => {
               <div className="space-y-2">
                 <div className="flex items-center">
                   <Key className="h-5 w-5 text-vault-accent mr-2" />
-                  <h3 className="font-medium">Retrieve</h3>
+                  <h3 className="font-medium" className="text-white">Retrieve</h3>
                 </div>
                 <p className="text-vault-muted text-sm">
                   Your encrypted passwords are retrieved and decrypted locally using your key. No sensitive data is ever exposed in transit.

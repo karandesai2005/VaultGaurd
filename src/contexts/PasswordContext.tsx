@@ -21,7 +21,7 @@ interface PasswordContextType {
 
 const PasswordContext = createContext<PasswordContextType | null>(null);
 
-const contractAddress = "0x525826FCA6fac419faA362A1c9e8426976a8aCA1";
+const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const contractAbi = [
   {
     anonymous: false,

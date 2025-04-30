@@ -49,7 +49,7 @@ const PasswordGenerator: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Shield className="h-5 w-5 text-vault-accent mr-2" />
-            <CardTitle>Generate Password</CardTitle>
+            <CardTitle className="text-white">Generate Password</CardTitle>
           </div>
         </div>
         <CardDescription>
@@ -84,7 +84,7 @@ const PasswordGenerator: React.FC = () => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="generatedPassword">Generated Password</Label>
+          <Label htmlFor="generatedPassword" className="text-white">Generated Password</Label>
           <div className="flex">
             <Input
               id="generatedPassword"

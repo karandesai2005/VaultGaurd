@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -69,7 +68,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
     <Card className="w-full max-w-md bg-vault-darker border-gray-800">
       <CardHeader className="space-y-1 flex items-center flex-col">
         <Shield className="h-12 w-12 text-vault-accent mb-2" />
-        <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center text-white">Create an Account</CardTitle>
         <CardDescription className="text-center">
           Sign up to start managing your passwords securely
         </CardDescription>
@@ -77,7 +76,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-white">Email</Label>
             <Input
               id="email"
               type="email"
@@ -89,7 +88,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-white">Password</Label>
             <Input
               id="password"
               type="password"
@@ -101,7 +100,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
             <Input
               id="confirmPassword"
               type="password"

@@ -8,7 +8,7 @@ const ipfs = create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 async function main() {
   const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
   const wallet = new ethers.Wallet("0xf2cc76b8c33853fcb2ce05c8a4901bf01aa662f89756e95be63ad36a8c9f8201", provider);
-  const contractAddress = "0x89732a1a0A4109ef9c812F63499C9c604e7CEEc1";
+  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const contractAbi = JSON.parse(fs.readFileSync("../artifacts/contracts/VaultGuard.sol/VaultGuard.json")).abi;
   const contract = new ethers.Contract(contractAddress, contractAbi, wallet);
 
